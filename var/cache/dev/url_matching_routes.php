@@ -17,8 +17,14 @@ return [
         '/admin' => [[['_route' => 'app_admin', '_controller' => 'App\\Controller\\AdminController::index'], null, null, null, false, false, null]],
         '/address' => [[['_route' => 'app_address', '_controller' => 'App\\Controller\\AdminController::showAddress'], null, null, null, false, false, null]],
         '/address/addAddress' => [[['_route' => 'app_add_address', '_controller' => 'App\\Controller\\AdminController::addAddress'], null, null, null, false, false, null]],
+        '/bank' => [[['_route' => 'app_bank', '_controller' => 'App\\Controller\\AdminController::showBank'], null, null, null, true, false, null]],
+        '/bank/addBank' => [[['_route' => 'app_add_bank', '_controller' => 'App\\Controller\\AdminController::addBank'], null, null, null, false, false, null]],
+        '/annonce' => [[['_route' => 'app_annonce', '_controller' => 'App\\Controller\\AdminController::showAnnonce'], null, null, null, true, false, null]],
+        '/address/addAnnonce' => [[['_route' => 'app_add_annonce', '_controller' => 'App\\Controller\\AdminController::addAnnonce'], null, null, null, false, false, null]],
+        '/admin/comment/addComment' => [[['_route' => 'app_add_comment', '_controller' => 'App\\Controller\\AdminController::addComment'], null, null, null, false, false, null]],
         '/home' => [[['_route' => 'app_home', '_controller' => 'App\\Controller\\HomeController::index'], null, null, null, false, false, null]],
         '/login' => [[['_route' => 'app_login', '_controller' => 'App\\Controller\\LoginController::index'], null, null, null, false, false, null]],
+        '/logout' => [[['_route' => 'app_logout', '_controller' => 'App\\Controller\\LoginController::logout'], null, ['GET' => 0], null, false, false, null]],
         '/register' => [[['_route' => 'app_register', '_controller' => 'App\\Controller\\RegistrationController::register'], null, null, null, false, false, null]],
     ],
     [ // $regexpList
@@ -43,8 +49,13 @@ return [
                         .'|update/([^/]++)(*:199)'
                         .'|delete/([^/]++)(*:222)'
                     .')'
-                    .'|nnonce/([^/]++)(*:246)'
+                    .'|nnonce/(?'
+                        .'|update/([^/]++)(*:256)'
+                        .'|delete/([^/]++)(*:279)'
+                    .')'
                 .')'
+                .'|/home/annonce/([^/]++)(*:311)'
+                .'|/profile/(\\d+)(*:333)'
             .')/?$}sDu',
     ],
     [ // $dynamicRoutes
@@ -57,8 +68,11 @@ return [
         159 => [[['_route' => '_profiler', '_controller' => 'web_profiler.controller.profiler::panelAction'], ['token'], null, null, false, true, null]],
         199 => [[['_route' => 'app_update_address', '_controller' => 'App\\Controller\\AdminController::update'], ['address'], null, null, false, true, null]],
         222 => [[['_route' => 'app_delete_address', '_controller' => 'App\\Controller\\AdminController::deleteAddress'], ['address'], null, null, false, true, null]],
-        246 => [
-            [['_route' => 'app_annonce_id', '_controller' => 'App\\Controller\\HomeController::getAnnonceId'], ['annonce'], null, null, false, true, null],
+        256 => [[['_route' => 'app_update_annonce', '_controller' => 'App\\Controller\\AdminController::updateAnnonce'], ['annonce'], null, null, false, true, null]],
+        279 => [[['_route' => 'app_delete_annonce', '_controller' => 'App\\Controller\\AdminController::deleteAnnonce'], ['annonce'], null, null, false, true, null]],
+        311 => [[['_route' => 'app_annonce_id', '_controller' => 'App\\Controller\\HomeController::getAnnonceId'], ['annonce'], null, null, false, true, null]],
+        333 => [
+            [['_route' => 'app_user', '_controller' => 'App\\Controller\\LoginController::accessUser'], ['id'], null, null, false, true, null],
             [null, null, null, null, false, false, 0],
         ],
     ],

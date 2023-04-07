@@ -21,6 +21,8 @@ security:
                 #app_login from LoginController
                 login-path: app_login
                 check-path: app_login
+            logout:
+                path: app_logout
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -31,8 +33,16 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # require ROLE_ADMIN for /admin*
+        - { path: '^/admin', roles: ROLE_USER }
+
+        # or require ROLE_ADMIN or IS_AUTHENTICATED_FULLY for /admin*
+        - { path: '^/admin', roles: [ IS_AUTHENTICATED_FULLY, ROLE_USER ] }
+
+        # the 'path' value can be any valid regular expression
+        # (this one will match URLs like /api/post/7298 and /api/comment/528491)
+        - { path: ^/api/(post|comment)/\d+$, roles: ROLE_USER }
+
 
 when@test:
     security:

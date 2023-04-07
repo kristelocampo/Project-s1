@@ -3,9 +3,19 @@
 namespace App\Controller;
 
 use App\Entity\Address;
+use App\Entity\Annonce;
+use App\Entity\Bank;
+use App\Entity\Commentary;
+use App\Entity\User;
 use App\Form\AddressFormType;
+use App\Form\AnnonceFormType;
+use App\Form\BankFormType;
+use App\Form\CommentaryFormType;
 use App\Form\RestaurantType;
 use App\Repository\AddressRepository;
+use App\Repository\AnnonceRepository;
+use App\Repository\BankRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,10 +36,12 @@ class AdminController extends AbstractController
     }
 
     #[Route('/admin', name: 'app_admin')]
-    public function index(): Response
+    public function index(UserRepository $userRepository): Response
     {
+        $user = $userRepository->findAll();
         return $this->render('admin/index.html.twig', [
             'controller_name' => 'AdminController',
+            'user' => $user
         ]);
     }
 
@@ -85,6 +97,107 @@ class AdminController extends AbstractController
         return $this->redirectToRoute("app_address");
 
     }
+
+    #[Route('bank/' , name: 'app_bank')]
+    public function showBank(BankRepository $bankRepository, UserRepository $userRepository): Response
+    {
+        $bank = $bankRepository->findAll();
+        $user_id = $userRepository->find('user_id');
+        return $this->render('admin/bank.html.twig', [
+            'user_id' => $user_id,
+            'bank' => $bank
+
+        ]);
+    }
+    #[Route('bank/addBank' , name: 'app_add_bank')]
+    public function addBank(Request $request) : Response
+    {
+        $bank = new Bank();
+        $form = $this->createForm(BankFormType::class, $bank);
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid()) {
+            $this->em->persist($bank);
+            $this->em->flush();
+            return $this->redirectToRoute('app_admin');
+        }
+
+        return $this->render('admin/addBank.html.twig',[
+            'form' => $form->createView()
+        ]);
+    }
+
+    #[Route('annonce/' , name: 'app_annonce')]
+    public function showAnnonce(AnnonceRepository $annonceRepository): Response
+    {
+        $annonces = $annonceRepository->findAll();
+
+        return $this->render('admin/annonceId.html.twig', [
+            'annonces' => $annonces
+        ]);
+    }
+
+    #[Route('address/addAnnonce' , name: 'app_add_annonce')]
+    public function addAnnonce(Request $request) : Response
+    {
+        $annonce = new Annonce();
+        $form = $this->createForm(AnnonceFormType::class, $annonce);
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid()) {
+            $this->em->persist($annonce);
+            $this->em->flush();
+            return $this->redirectToRoute('app_annonce');
+        }
+
+        return $this->render('admin/addAnnonce.html.twig',[
+            'form' => $form->createView()
+        ]);
+    }
+
+    #[Route('annonce/update/{annonce}', name: 'app_update_annonce')]
+    public function updateAnnonce(Annonce $annonce, Request $request): Response
+    {
+        $form = $this->createForm(AnnonceFormType::class, $annonce);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->em->persist($annonce);
+            $this->em->flush();
+            return $this->redirectToRoute('app_annonce');
+        }
+        return $this->render('admin/addAnnonce.html.twig', [
+            'form' => $form->createView()
+        ]);
+    }
+
+    #[Route('annonce/delete/{annonce}', name: 'app_delete_annonce')]
+    public function deleteAnnonce(Annonce $annonce, Request $request) : Response
+    {
+        $this->em->remove($annonce);
+        $this->em->flush();
+
+        return $this->redirectToRoute("app_annonce");
+
+    }
+
+    #[Route('admin/comment/addComment' , name: 'app_add_comment')]
+    public function addComment(Request $request, User $user) : Response
+    {
+        $comment = new Commentary();
+        $form = $this->createForm(CommentaryFormType::class, $comment);
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid()) {
+            $this->em->persist($comment);
+            $this->em->flush();
+            return $this->redirectToRoute('app_annonce');
+        }
+
+        $user_id = $user->getId();
+        return $this->render('admin/addComment.html.twig',[
+            'user_id_id' => $user_id,
+            'form' => $form->createView()
+        ]);
+    }
+
+
 
 
 

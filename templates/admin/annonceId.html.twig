@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello HomeController!{% endblock %}
+
+{% block body %}
+    <div>
+
+        <button><a href="{{ path('app_add_annonce') }}"> Add Annonce</a></button>
+        {% for annonce in annonces %}
+            <h3> {{ annonce.name }} </h3>
+            <p> {{ annonce.description}} </p>
+            <p> {{ annonce.price }}</p>
+            <button><a href="{{ path('app_update_annonce', {"annonce": annonce.id}) }}"> Update </a></button>
+            <button><a href="{{ path('app_delete_annonce', {"annonce": annonce.id}) }}"> Delete </a></button>
+            <button><a href="{{ path('app_add_comment') }}">Add Comment</a></button>
+            <button>Buy</button>
+            </ul>
+        {% endfor %}
+    </div>
+{% endblock %}

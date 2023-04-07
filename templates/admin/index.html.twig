@@ -9,10 +9,14 @@
 </style>
 
 <div class="example-wrapper">
-    <h1>Hello admin</h1>
+    {% for users in user %}
+        <h1>Hello {{ users.pseudo }}</h1>
+    {% endfor %}
 
     <button><a href="{{ path('app_address') }}">Show Address</a></button>
-    <button><a href="{{ path('app_address') }}">Add Bank Amount</a></button>
-    <button><a href="{{ path('app_address') }}">Show Announce</a></button>
+    <button><a href="{{ path('app_bank') }}">Show Bank Amount</a></button>
+    <button><a href="{{ path('app_annonce') }}">Show Announce</a></button>
+
+    <p><a href="{{ path('app_logout') }}">Logout</a></p>
 </div>
 {% endblock %}

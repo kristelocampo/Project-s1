@@ -91,20 +91,39 @@ class __TwigTemplate_a1ac67b41a1a13ff5704b686c61ba9d7 extends Template
 </style>
 
 <div class=\"example-wrapper\">
-    <h1>Hello admin</h1>
-
-    <button><a href=\"";
-        // line 14
-        echo $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_address");
-        echo "\">Show Address</a></button>
-    <button><a href=\"";
+    ";
+        // line 12
+        $context['_parent'] = $context;
+        $context['_seq'] = twig_ensure_traversable((isset($context["user"]) || array_key_exists("user", $context) ? $context["user"] : (function () { throw new RuntimeError('Variable "user" does not exist.', 12, $this->source); })()));
+        foreach ($context['_seq'] as $context["_key"] => $context["users"]) {
+            // line 13
+            echo "        <h1>Hello ";
+            echo twig_escape_filter($this->env, twig_get_attribute($this->env, $this->source, $context["users"], "pseudo", [], "any", false, false, false, 13), "html", null, true);
+            echo "</h1>
+    ";
+        }
+        $_parent = $context['_parent'];
+        unset($context['_seq'], $context['_iterated'], $context['_key'], $context['users'], $context['_parent'], $context['loop']);
+        $context = array_intersect_key($context, $_parent) + $_parent;
         // line 15
-        echo $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_address");
-        echo "\">Add Bank Amount</a></button>
+        echo "
     <button><a href=\"";
         // line 16
         echo $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_address");
+        echo "\">Show Address</a></button>
+    <button><a href=\"";
+        // line 17
+        echo $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_bank");
+        echo "\">Show Bank Amount</a></button>
+    <button><a href=\"";
+        // line 18
+        echo $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_annonce");
         echo "\">Show Announce</a></button>
+
+    <p><a href=\"";
+        // line 20
+        echo $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_logout");
+        echo "\">Logout</a></p>
 </div>
 ";
         
@@ -127,7 +146,7 @@ class __TwigTemplate_a1ac67b41a1a13ff5704b686c61ba9d7 extends Template
 
     public function getDebugInfo()
     {
-        return array (  106 => 16,  102 => 15,  98 => 14,  88 => 6,  78 => 5,  59 => 3,  36 => 1,);
+        return array (  125 => 20,  120 => 18,  116 => 17,  112 => 16,  109 => 15,  100 => 13,  96 => 12,  88 => 6,  78 => 5,  59 => 3,  36 => 1,);
     }
 
     public function getSourceContext()
@@ -143,11 +162,15 @@ class __TwigTemplate_a1ac67b41a1a13ff5704b686c61ba9d7 extends Template
 </style>
 
 <div class=\"example-wrapper\">
-    <h1>Hello admin</h1>
+    {% for users in user %}
+        <h1>Hello {{ users.pseudo }}</h1>
+    {% endfor %}
 
     <button><a href=\"{{ path('app_address') }}\">Show Address</a></button>
-    <button><a href=\"{{ path('app_address') }}\">Add Bank Amount</a></button>
-    <button><a href=\"{{ path('app_address') }}\">Show Announce</a></button>
+    <button><a href=\"{{ path('app_bank') }}\">Show Bank Amount</a></button>
+    <button><a href=\"{{ path('app_annonce') }}\">Show Announce</a></button>
+
+    <p><a href=\"{{ path('app_logout') }}\">Logout</a></p>
 </div>
 {% endblock %}
 ", "admin/index.html.twig", "/Users/kristelocampo/Desktop/3W Academy/Project-s1/templates/admin/index.html.twig");

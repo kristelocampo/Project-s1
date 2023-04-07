@@ -92,32 +92,36 @@ class __TwigTemplate_87c8a87cb5180459d661f5677dccc6fb extends Template
 
     <div class=\"example-wrapper\">
         <h2>Address List</h2>
-        ";
+        <button><a href=\"";
         // line 13
+        echo $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_add_address");
+        echo "\">Add Address</a></button>
+        ";
+        // line 14
         $context['_parent'] = $context;
-        $context['_seq'] = twig_ensure_traversable((isset($context["address"]) || array_key_exists("address", $context) ? $context["address"] : (function () { throw new RuntimeError('Variable "address" does not exist.', 13, $this->source); })()));
+        $context['_seq'] = twig_ensure_traversable((isset($context["address"]) || array_key_exists("address", $context) ? $context["address"] : (function () { throw new RuntimeError('Variable "address" does not exist.', 14, $this->source); })()));
         foreach ($context['_seq'] as $context["_key"] => $context["addresses"]) {
-            // line 14
+            // line 15
             echo "            <ul>
                 <li> ";
-            // line 15
-            echo twig_escape_filter($this->env, twig_get_attribute($this->env, $this->source, $context["addresses"], "street", [], "any", false, false, false, 15), "html", null, true);
+            // line 16
+            echo twig_escape_filter($this->env, twig_get_attribute($this->env, $this->source, $context["addresses"], "street", [], "any", false, false, false, 16), "html", null, true);
             echo " </li>
                 <li> ";
-            // line 16
-            echo twig_escape_filter($this->env, twig_get_attribute($this->env, $this->source, $context["addresses"], "city", [], "any", false, false, false, 16), "html", null, true);
+            // line 17
+            echo twig_escape_filter($this->env, twig_get_attribute($this->env, $this->source, $context["addresses"], "city", [], "any", false, false, false, 17), "html", null, true);
             echo "</li>
                 <li> ";
-            // line 17
-            echo twig_escape_filter($this->env, twig_get_attribute($this->env, $this->source, $context["addresses"], "zip", [], "any", false, false, false, 17), "html", null, true);
+            // line 18
+            echo twig_escape_filter($this->env, twig_get_attribute($this->env, $this->source, $context["addresses"], "zip", [], "any", false, false, false, 18), "html", null, true);
             echo "</li>
                 <button><a href=\"";
-            // line 18
-            echo twig_escape_filter($this->env, $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_update_address", ["address" => twig_get_attribute($this->env, $this->source, $context["addresses"], "id", [], "any", false, false, false, 18)]), "html", null, true);
+            // line 19
+            echo twig_escape_filter($this->env, $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_update_address", ["address" => twig_get_attribute($this->env, $this->source, $context["addresses"], "id", [], "any", false, false, false, 19)]), "html", null, true);
             echo "\"> Update </a></button>
                 <button><a href=\"";
-            // line 19
-            echo twig_escape_filter($this->env, $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_delete_address", ["address" => twig_get_attribute($this->env, $this->source, $context["addresses"], "id", [], "any", false, false, false, 19)]), "html", null, true);
+            // line 20
+            echo twig_escape_filter($this->env, $this->extensions['Symfony\Bridge\Twig\Extension\RoutingExtension']->getPath("app_delete_address", ["address" => twig_get_attribute($this->env, $this->source, $context["addresses"], "id", [], "any", false, false, false, 20)]), "html", null, true);
             echo "\"> Delete </a></button>
             </ul>
         ";
@@ -125,7 +129,7 @@ class __TwigTemplate_87c8a87cb5180459d661f5677dccc6fb extends Template
         $_parent = $context['_parent'];
         unset($context['_seq'], $context['_iterated'], $context['_key'], $context['addresses'], $context['_parent'], $context['loop']);
         $context = array_intersect_key($context, $_parent) + $_parent;
-        // line 22
+        // line 23
         echo "
     </div>
 ";
@@ -149,7 +153,7 @@ class __TwigTemplate_87c8a87cb5180459d661f5677dccc6fb extends Template
 
     public function getDebugInfo()
     {
-        return array (  129 => 22,  120 => 19,  116 => 18,  112 => 17,  108 => 16,  104 => 15,  101 => 14,  97 => 13,  88 => 6,  78 => 5,  59 => 3,  36 => 1,);
+        return array (  133 => 23,  124 => 20,  120 => 19,  116 => 18,  112 => 17,  108 => 16,  105 => 15,  101 => 14,  97 => 13,  88 => 6,  78 => 5,  59 => 3,  36 => 1,);
     }
 
     public function getSourceContext()
@@ -166,6 +170,7 @@ class __TwigTemplate_87c8a87cb5180459d661f5677dccc6fb extends Template
 
     <div class=\"example-wrapper\">
         <h2>Address List</h2>
+        <button><a href=\"{{ path('app_add_address') }}\">Add Address</a></button>
         {% for addresses in address %}
             <ul>
                 <li> {{ addresses.street }} </li>

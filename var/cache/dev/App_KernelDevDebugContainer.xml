@@ -315,6 +315,9 @@
     <service id="App\Form\BankFormType" class="App\Form\BankFormType" autowire="true" autoconfigure="true">
       <tag name="form.type"/>
     </service>
+    <service id="App\Form\CommentaryFormType" class="App\Form\CommentaryFormType" autowire="true" autoconfigure="true">
+      <tag name="form.type"/>
+    </service>
     <service id="App\Form\RegistrationFormType" class="App\Form\RegistrationFormType" autowire="true" autoconfigure="true">
       <tag name="form.type"/>
     </service>
@@ -341,6 +344,9 @@
     <service id="App\Repository\UserRepository" class="App\Repository\UserRepository" autowire="true" autoconfigure="true">
       <tag name="doctrine.repository_service"/>
       <argument type="service" id="doctrine"/>
+    </service>
+    <service id="App\Security\Voter\UserVoter" class="App\Security\Voter\UserVoter" autowire="true" autoconfigure="true">
+      <tag name="security.voter"/>
     </service>
     <service id="argument_metadata_factory" class="Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory"/>
     <service id="response_listener" class="Symfony\Component\HttpKernel\EventListener\ResponseListener">
@@ -996,6 +1002,7 @@
         <argument>App\Form\AddressFormType</argument>
         <argument>App\Form\AnnonceFormType</argument>
         <argument>App\Form\BankFormType</argument>
+        <argument>App\Form\CommentaryFormType</argument>
         <argument>App\Form\RegistrationFormType</argument>
         <argument>Symfony\Component\Form\Extension\Core\Type\FormType</argument>
         <argument>Symfony\Component\Form\Extension\Core\Type\ChoiceType</argument>
@@ -2215,7 +2222,7 @@
       <argument type="service" id="form.registry"/>
     </service>
     <service id="form.extension" class="Symfony\Component\Form\Extension\DependencyInjection\DependencyInjectionExtension">
-      <argument type="service" id=".service_locator.RKtP5na"/>
+      <argument type="service" id=".service_locator.I89tAQt"/>
       <argument type="collection">
         <argument key="Symfony\Component\Form\Extension\Core\Type\FormType" type="iterator">
           <argument type="service" id="form.type_extension.form.transformation_failure_handling"/>
@@ -3790,6 +3797,14 @@
       <argument type="service" id="request_stack" on-invalid="null"/>
       <argument type="service" id="router.default" on-invalid="null"/>
       <argument type="service" id="security.token_storage" on-invalid="null"/>
+      <call method="registerListener">
+        <argument>main</argument>
+        <argument>app_logout</argument>
+        <argument>logout</argument>
+        <argument>_csrf_token</argument>
+        <argument>null</argument>
+        <argument>null</argument>
+      </call>
     </service>
     <service id="security.user.provider.missing" class="Symfony\Component\Security\Core\User\MissingUserProvider" abstract="true">
       <argument type="abstract">firewall</argument>
@@ -3880,7 +3895,30 @@
         </service>
       </argument>
     </service>
-    <service id="security.access_map" class="Symfony\Component\Security\Http\AccessMap"/>
+    <service id="security.access_map" class="Symfony\Component\Security\Http\AccessMap">
+      <call method="add">
+        <argument type="service" id=".security.request_matcher.28NqKnb"/>
+        <argument type="collection">
+          <argument>ROLE_USER</argument>
+        </argument>
+        <argument>null</argument>
+      </call>
+      <call method="add">
+        <argument type="service" id=".security.request_matcher.28NqKnb"/>
+        <argument type="collection">
+          <argument>IS_AUTHENTICATED_FULLY</argument>
+          <argument>ROLE_USER</argument>
+        </argument>
+        <argument>null</argument>
+      </call>
+      <call method="add">
+        <argument type="service" id=".security.request_matcher.XWFInJU"/>
+        <argument type="collection">
+          <argument>ROLE_USER</argument>
+        </argument>
+        <argument>null</argument>
+      </call>
+    </service>
     <service id="security.context_listener" class="Symfony\Component\Security\Http\Firewall\ContextListener">
       <tag name="monolog.logger" channel="security"/>
       <argument type="service" id="security.untracked_token_storage"/>
@@ -4191,7 +4229,15 @@
         <argument>form_login</argument>
       </argument>
       <argument>null</argument>
-      <argument>null</argument>
+      <argument type="collection">
+        <argument key="path">app_logout</argument>
+        <argument key="enable_csrf">null</argument>
+        <argument key="csrf_token_id">logout</argument>
+        <argument key="csrf_parameter">_csrf_token</argument>
+        <argument key="target">/</argument>
+        <argument key="invalidate_session">true</argument>
+        <argument key="delete_cookies" type="collection"/>
+      </argument>
     </service>
     <service id="security.listener.main.user_provider" class="Symfony\Component\Security\Http\EventListener\UserProviderListener">
       <tag name="kernel.event_listener" dispatcher="security.event_dispatcher.main" event="Symfony\Component\Security\Http\Event\CheckPassportEvent" priority="2048" method="checkPassport"/>
@@ -4212,6 +4258,22 @@
         <argument type="collection">
           <argument type="service_closure" id="security.listener.session.main"/>
           <argument>onSuccessfulLogin</argument>
+        </argument>
+        <argument>0</argument>
+      </call>
+      <call method="addListener">
+        <argument>Symfony\Component\Security\Http\Event\LogoutEvent</argument>
+        <argument type="collection">
+          <argument type="service_closure" id="security.logout.listener.default.main"/>
+          <argument>onLogout</argument>
+        </argument>
+        <argument>64</argument>
+      </call>
+      <call method="addListener">
+        <argument>Symfony\Component\Security\Http\Event\LogoutEvent</argument>
+        <argument type="collection">
+          <argument type="service_closure" id="security.logout.listener.session.main"/>
+          <argument>onLogout</argument>
         </argument>
         <argument>0</argument>
       </call>
@@ -4294,6 +4356,24 @@
     <service id="security.listener.session.main" class="Symfony\Component\Security\Http\EventListener\SessionStrategyListener">
       <tag name="kernel.event_subscriber" dispatcher="security.event_dispatcher.main"/>
       <argument type="service" id="security.authentication.session_strategy"/>
+    </service>
+    <service id="security.logout_listener.main" class="Symfony\Component\Security\Http\Firewall\LogoutListener">
+      <argument type="service" id="security.token_storage"/>
+      <argument type="service" id="security.http_utils"/>
+      <argument type="service" id="security.event_dispatcher.main"/>
+      <argument type="collection">
+        <argument key="csrf_parameter">_csrf_token</argument>
+        <argument key="csrf_token_id">logout</argument>
+        <argument key="logout_path">app_logout</argument>
+      </argument>
+    </service>
+    <service id="security.logout.listener.default.main" class="Symfony\Component\Security\Http\EventListener\DefaultLogoutListener">
+      <tag name="kernel.event_subscriber" dispatcher="security.event_dispatcher.main"/>
+      <argument type="service" id="security.http_utils"/>
+      <argument>/</argument>
+    </service>
+    <service id="security.logout.listener.session.main" class="Symfony\Component\Security\Http\EventListener\SessionLogoutListener">
+      <tag name="kernel.event_subscriber" dispatcher="security.event_dispatcher.main"/>
     </service>
     <service id="security.authenticator.form_login.main" class="Symfony\Component\Security\Http\Authenticator\FormLoginAuthenticator">
       <argument type="service" id="security.http_utils"/>
@@ -4390,7 +4470,7 @@
         <argument type="service" id="security.access_listener"/>
       </argument>
       <argument type="service" id="security.exception_listener.main"/>
-      <argument>null</argument>
+      <argument type="service" id="security.logout_listener.main"/>
       <argument type="service" id="security.firewall.map.config.main"/>
       <argument type="service" id="security.untracked_token_storage"/>
     </service>
@@ -4399,6 +4479,22 @@
       <argument type="collection">
         <argument key="security.firewall.map.context.dev" type="service_closure" id="security.firewall.map.context.dev"/>
         <argument key="security.firewall.map.context.main" type="service_closure" id="security.firewall.map.context.main"/>
+      </argument>
+    </service>
+    <service id=".security.request_matcher.obhk0jm" class="Symfony\Component\HttpFoundation\RequestMatcher\PathRequestMatcher">
+      <argument>^/admin</argument>
+    </service>
+    <service id=".security.request_matcher.28NqKnb" class="Symfony\Component\HttpFoundation\ChainRequestMatcher">
+      <argument type="collection">
+        <argument type="service" id=".security.request_matcher.obhk0jm"/>
+      </argument>
+    </service>
+    <service id=".security.request_matcher.n53r2q2" class="Symfony\Component\HttpFoundation\RequestMatcher\PathRequestMatcher">
+      <argument>^/api/(post|comment)/\d+$</argument>
+    </service>
+    <service id=".security.request_matcher.XWFInJU" class="Symfony\Component\HttpFoundation\ChainRequestMatcher">
+      <argument type="collection">
+        <argument type="service" id=".security.request_matcher.n53r2q2"/>
       </argument>
     </service>
     <service id="security.command.user_password_hash" class="Symfony\Component\PasswordHasher\Command\UserPasswordHashCommand">
@@ -4792,6 +4888,8 @@
     <service id=".abstract.instanceof.App\Form\AnnonceFormType" class="App\Form\AnnonceFormType" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Symfony\Component\Form\FormTypeInterface.0.App\Form\BankFormType" class="App\Form\BankFormType" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Form\BankFormType" class="App\Form\BankFormType" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Component\Form\FormTypeInterface.0.App\Form\CommentaryFormType" class="App\Form\CommentaryFormType" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Form\CommentaryFormType" class="App\Form\CommentaryFormType" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Symfony\Component\Form\FormTypeInterface.0.App\Form\RegistrationFormType" class="App\Form\RegistrationFormType" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Form\RegistrationFormType" class="App\Form\RegistrationFormType" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\AcquisitionRepository" class="App\Repository\AcquisitionRepository" autowire="true" abstract="true"/>
@@ -4806,6 +4904,8 @@
     <service id=".abstract.instanceof.App\Repository\CommentaryRepository" class="App\Repository\CommentaryRepository" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\UserRepository" class="App\Repository\UserRepository" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Repository\UserRepository" class="App\Repository\UserRepository" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Component\Security\Core\Authorization\Voter\VoterInterface.0.App\Security\Voter\UserVoter" class="App\Security\Voter\UserVoter" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Security\Voter\UserVoter" class="App\Security\Voter\UserVoter" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".service_locator.7nzbL4K" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
@@ -5143,6 +5243,12 @@
         <argument key="loader" type="service_closure" id=".errored..service_locator.y4_Zrx..Symfony\Component\Config\Loader\LoaderInterface"/>
       </argument>
     </service>
+    <service id=".service_locator.kPUOGb8" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="userRepository" type="service_closure" id="App\Repository\UserRepository"/>
+      </argument>
+    </service>
     <service id=".service_locator.VN7ySI4" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
@@ -5155,6 +5261,13 @@
         <argument key="address" type="service_closure" id=".errored..service_locator.xu0ZQ4H.App\Entity\Address"/>
       </argument>
     </service>
+    <service id=".service_locator.dyXehMn" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="bankRepository" type="service_closure" id="App\Repository\BankRepository"/>
+        <argument key="userRepository" type="service_closure" id="App\Repository\UserRepository"/>
+      </argument>
+    </service>
     <service id=".service_locator.UnVjGk7" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
@@ -5165,6 +5278,19 @@
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="annonce" type="service_closure" id=".errored..service_locator.2XW8uQ7.App\Entity\Annonce"/>
+      </argument>
+    </service>
+    <service id=".service_locator.Hz5btge" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="user" type="service_closure" id=".errored..service_locator.Hz5btge.App\Entity\User"/>
+      </argument>
+    </service>
+    <service id=".service_locator.avm1qzp" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="annonceRepository" type="service_closure" id="App\Repository\AnnonceRepository"/>
+        <argument key="commentaryRepository" type="service_closure" id="App\Repository\CommentaryRepository"/>
       </argument>
     </service>
     <service id=".service_locator.rSTd.nA" class="Symfony\Component\DependencyInjection\ServiceLocator">
@@ -5180,25 +5306,39 @@
         <argument key="userPasswordHasher" type="service_closure" id="security.user_password_hasher"/>
       </argument>
     </service>
-    <service id=".service_locator.qISnWb4" class="Symfony\Component\DependencyInjection\ServiceLocator">
+    <service id=".service_locator.c9H6.vv" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
+        <argument key="App\Controller\AdminController::addComment" type="service_closure" id=".service_locator.Hz5btge"/>
         <argument key="App\Controller\AdminController::deleteAddress" type="service_closure" id=".service_locator.xu0ZQ4H"/>
+        <argument key="App\Controller\AdminController::deleteAnnonce" type="service_closure" id=".service_locator.2XW8uQ7"/>
+        <argument key="App\Controller\AdminController::index" type="service_closure" id=".service_locator.kPUOGb8"/>
         <argument key="App\Controller\AdminController::showAddress" type="service_closure" id=".service_locator.VN7ySI4"/>
+        <argument key="App\Controller\AdminController::showAnnonce" type="service_closure" id=".service_locator.UnVjGk7"/>
+        <argument key="App\Controller\AdminController::showBank" type="service_closure" id=".service_locator.dyXehMn"/>
         <argument key="App\Controller\AdminController::update" type="service_closure" id=".service_locator.xu0ZQ4H"/>
+        <argument key="App\Controller\AdminController::updateAnnonce" type="service_closure" id=".service_locator.2XW8uQ7"/>
         <argument key="App\Controller\HomeController::getAnnonceId" type="service_closure" id=".service_locator.2XW8uQ7"/>
-        <argument key="App\Controller\HomeController::index" type="service_closure" id=".service_locator.UnVjGk7"/>
+        <argument key="App\Controller\HomeController::index" type="service_closure" id=".service_locator.avm1qzp"/>
+        <argument key="App\Controller\LoginController::accessUser" type="service_closure" id=".service_locator.Hz5btge"/>
         <argument key="App\Controller\LoginController::index" type="service_closure" id=".service_locator.rSTd.nA"/>
         <argument key="App\Controller\RegistrationController::register" type="service_closure" id=".service_locator.e_4zbH4"/>
         <argument key="App\Kernel::loadRoutes" type="service_closure" id=".service_locator.y4_Zrx."/>
         <argument key="App\Kernel::registerContainerConfiguration" type="service_closure" id=".service_locator.y4_Zrx."/>
         <argument key="kernel::loadRoutes" type="service_closure" id=".service_locator.y4_Zrx."/>
         <argument key="kernel::registerContainerConfiguration" type="service_closure" id=".service_locator.y4_Zrx."/>
+        <argument key="App\Controller\AdminController:addComment" type="service_closure" id=".service_locator.Hz5btge"/>
         <argument key="App\Controller\AdminController:deleteAddress" type="service_closure" id=".service_locator.xu0ZQ4H"/>
+        <argument key="App\Controller\AdminController:deleteAnnonce" type="service_closure" id=".service_locator.2XW8uQ7"/>
+        <argument key="App\Controller\AdminController:index" type="service_closure" id=".service_locator.kPUOGb8"/>
         <argument key="App\Controller\AdminController:showAddress" type="service_closure" id=".service_locator.VN7ySI4"/>
+        <argument key="App\Controller\AdminController:showAnnonce" type="service_closure" id=".service_locator.UnVjGk7"/>
+        <argument key="App\Controller\AdminController:showBank" type="service_closure" id=".service_locator.dyXehMn"/>
         <argument key="App\Controller\AdminController:update" type="service_closure" id=".service_locator.xu0ZQ4H"/>
+        <argument key="App\Controller\AdminController:updateAnnonce" type="service_closure" id=".service_locator.2XW8uQ7"/>
         <argument key="App\Controller\HomeController:getAnnonceId" type="service_closure" id=".service_locator.2XW8uQ7"/>
-        <argument key="App\Controller\HomeController:index" type="service_closure" id=".service_locator.UnVjGk7"/>
+        <argument key="App\Controller\HomeController:index" type="service_closure" id=".service_locator.avm1qzp"/>
+        <argument key="App\Controller\LoginController:accessUser" type="service_closure" id=".service_locator.Hz5btge"/>
         <argument key="App\Controller\LoginController:index" type="service_closure" id=".service_locator.rSTd.nA"/>
         <argument key="App\Controller\RegistrationController:register" type="service_closure" id=".service_locator.e_4zbH4"/>
         <argument key="kernel:loadRoutes" type="service_closure" id=".service_locator.y4_Zrx."/>
@@ -5279,12 +5419,13 @@
       <argument type="service" id="debug.argument_resolver.not_tagged_controller.inner"/>
       <argument type="service" id="debug.stopwatch"/>
     </service>
-    <service id=".service_locator.RKtP5na" class="Symfony\Component\DependencyInjection\ServiceLocator">
+    <service id=".service_locator.I89tAQt" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="App\Form\AddressFormType" type="service_closure" id="App\Form\AddressFormType"/>
         <argument key="App\Form\AnnonceFormType" type="service_closure" id="App\Form\AnnonceFormType"/>
         <argument key="App\Form\BankFormType" type="service_closure" id="App\Form\BankFormType"/>
+        <argument key="App\Form\CommentaryFormType" type="service_closure" id="App\Form\CommentaryFormType"/>
         <argument key="App\Form\RegistrationFormType" type="service_closure" id="App\Form\RegistrationFormType"/>
         <argument key="Symfony\Bridge\Doctrine\Form\Type\EntityType" type="service_closure" id="form.type.entity"/>
         <argument key="Symfony\Component\Form\Extension\Core\Type\ChoiceType" type="service_closure" id="form.type.choice"/>
@@ -5380,6 +5521,10 @@
     </service>
     <service id="debug.security.voter.security.access.simple_role_voter" class="Symfony\Component\Security\Core\Authorization\Voter\TraceableVoter">
       <argument type="service" id="security.access.simple_role_voter"/>
+      <argument type="service" id="debug.event_dispatcher"/>
+    </service>
+    <service id="debug.security.voter.App\Security\Voter\UserVoter" class="Symfony\Component\Security\Core\Authorization\Voter\TraceableVoter">
+      <argument type="service" id="App\Security\Voter\UserVoter"/>
       <argument type="service" id="debug.event_dispatcher"/>
     </service>
     <service id="security.listener.csrf_protection" class="Symfony\Component\Security\Http\EventListener\CsrfProtectionListener">
@@ -5557,6 +5702,7 @@
       <argument type="iterator">
         <argument type="service" id="debug.security.voter.security.access.authenticated_voter"/>
         <argument type="service" id="debug.security.voter.security.access.simple_role_voter"/>
+        <argument type="service" id="debug.security.voter.App\Security\Voter\UserVoter"/>
       </argument>
       <argument type="service">
         <service class="Symfony\Component\Security\Core\Authorization\Strategy\AffirmativeStrategy">
@@ -5580,12 +5726,12 @@
     <service id="debug.argument_resolver.request.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\RequestValueResolver"/>
     <service id="debug.argument_resolver.session.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\SessionValueResolver"/>
     <service id="debug.argument_resolver.service.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\ServiceValueResolver">
-      <argument type="service" id=".service_locator.qISnWb4"/>
+      <argument type="service" id=".service_locator.c9H6.vv"/>
     </service>
     <service id="debug.argument_resolver.default.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\DefaultValueResolver"/>
     <service id="debug.argument_resolver.variadic.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\VariadicValueResolver"/>
     <service id="debug.argument_resolver.not_tagged_controller.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\NotTaggedControllerValueResolver">
-      <argument type="service" id=".service_locator.qISnWb4"/>
+      <argument type="service" id=".service_locator.c9H6.vv"/>
     </service>
     <service id="debug.traced.messenger.bus.default.inner" class="Symfony\Component\Messenger\MessageBus">
       <argument type="iterator">
@@ -5607,6 +5753,7 @@
     <service id=".errored..service_locator.y4_Zrx..Symfony\Component\Config\Loader\LoaderInterface" class="Symfony\Component\Config\Loader\LoaderInterface"/>
     <service id=".errored..service_locator.xu0ZQ4H.App\Entity\Address" class="App\Entity\Address"/>
     <service id=".errored..service_locator.2XW8uQ7.App\Entity\Annonce" class="App\Entity\Annonce"/>
+    <service id=".errored..service_locator.Hz5btge.App\Entity\User" class="App\Entity\User"/>
     <service id=".console.command.about.lazy" class="Symfony\Component\Console\Command\LazyCommand">
       <argument>about</argument>
       <argument type="collection"/>
@@ -6430,15 +6577,15 @@
     <service id="Symfony\Component\Mime\BodyRendererInterface" alias="twig.mime_body_renderer"/>
     <service id="container.env_var_processors_locator" alias=".service_locator.7nzbL4K" public="true"/>
     <service id="twig.loader.filesystem" alias="twig.loader.native_filesystem"/>
-    <service id="argument_resolver.controller_locator" alias=".service_locator.qISnWb4"/>
+    <service id="argument_resolver.controller_locator" alias=".service_locator.c9H6.vv"/>
     <service id="doctrine.id_generator_locator" alias=".service_locator.KLVvNIq"/>
     <service id="twig.loader" alias="twig.loader.native_filesystem"/>
     <service id="Psr\Log\LoggerInterface" alias="logger"/>
     <service id=".service_locator.o.uf2zi" alias=".service_locator.7nzbL4K"/>
     <service id=".service_locator.V6D1oJY" alias=".service_locator.e_4zbH4"/>
-    <service id=".service_locator.ADHLvTW" alias=".service_locator.qISnWb4"/>
+    <service id=".service_locator.BgiSO92" alias=".service_locator.c9H6.vv"/>
     <service id=".service_locator.z7kAUPH" alias=".service_locator.vp1pfih"/>
-    <service id=".service_locator.zBV0EUn" alias=".service_locator.RKtP5na"/>
+    <service id=".service_locator.C0Zzq_n" alias=".service_locator.I89tAQt"/>
     <service id=".service_locator.XW18Svm" alias=".service_locator.TcKhdzh"/>
     <service id=".service_locator.VZoQk0z" alias=".service_locator.CshazM0"/>
     <service id="validator" alias="debug.validator"/>
@@ -6464,10 +6611,14 @@
     <service id="doctrine.orm.default_metadata_driver" alias=".doctrine.orm.default_metadata_driver"/>
     <service id=".service_locator.Xbsa8iG" alias="messenger.retry_strategy_locator"/>
     <service id=".service_locator.gFlme_s" alias=".service_locator.y4_Zrx."/>
+    <service id=".service_locator.025Wi8b" alias=".service_locator.kPUOGb8"/>
     <service id=".service_locator.EzvINaQ" alias=".service_locator.VN7ySI4"/>
     <service id=".service_locator.UGpYhEI" alias=".service_locator.xu0ZQ4H"/>
+    <service id=".service_locator.Y0gZok0" alias=".service_locator.dyXehMn"/>
     <service id=".service_locator.yRO.3nG" alias=".service_locator.UnVjGk7"/>
     <service id=".service_locator.SABrjsv" alias=".service_locator.2XW8uQ7"/>
+    <service id=".service_locator.EmZ4cZI" alias=".service_locator.Hz5btge"/>
+    <service id=".service_locator.ASUGpot" alias=".service_locator.avm1qzp"/>
     <service id=".service_locator.7NIAq8D" alias=".service_locator.rSTd.nA"/>
     <service id=".service_locator.qnm_CJ1" alias=".service_locator.e_4zbH4"/>
     <service id=".service_locator.e4zRSya" alias=".service_locator.CshazM0"/>

@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Bank;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -13,7 +14,7 @@ class BankFormType extends AbstractType
     {
         $builder
             ->add('amount')
-            ->add('user_id')
+            ->add('save', SubmitType::class)
         ;
     }
 

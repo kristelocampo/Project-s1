@@ -10,6 +10,7 @@
 
     <div class="example-wrapper">
         <h2>Address List</h2>
+        <button><a href="{{ path('app_add_address') }}">Add Address</a></button>
         {% for addresses in address %}
             <ul>
                 <li> {{ addresses.street }} </li>
