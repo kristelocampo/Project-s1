@@ -25,11 +25,12 @@ class Annonce
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0')]
     private ?string $price = null;
 
-    #[ORM\Column]
-    private ?bool $is_visible = null;
 
     #[ORM\OneToMany(mappedBy: 'annonce_id', targetEntity: Commentary::class)]
     private Collection $user_id;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $is_visible = null;
 
     public function __construct()
     {
@@ -77,18 +78,6 @@ class Annonce
         return $this;
     }
 
-    public function isIsVisible(): ?bool
-    {
-        return $this->is_visible;
-    }
-
-    public function setIsVisible(bool $is_visible): self
-    {
-        $this->is_visible = $is_visible;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Commentary>
      */
@@ -115,6 +104,18 @@ class Annonce
                 $userId->setAnnonceId(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isIsVisible(): ?bool
+    {
+        return $this->is_visible;
+    }
+
+    public function setIsVisible(?bool $is_visible): self
+    {
+        $this->is_visible = $is_visible;
 
         return $this;
     }

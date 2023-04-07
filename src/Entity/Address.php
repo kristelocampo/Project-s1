@@ -25,8 +25,8 @@ class Address
     private ?int $zip = null;
 
     #[ORM\ManyToOne(inversedBy: 'user_id')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $user ;
 
     #[ORM\OneToMany(mappedBy: 'address_id', targetEntity: Acquisition::class)]
     private Collection $acquisitions;

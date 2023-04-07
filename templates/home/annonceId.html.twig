@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello HomeController!{% endblock %}
+
+{% block body %}
+    <div>
+
+        <h3> {{ annonce.name }} </h3>
+        <p> {{ annonce.description}} </p>
+        <p> {{ annonce.price }}</p>
+    </div>
+{% endblock %}

@@ -17,6 +17,11 @@ security:
             lazy: true
             provider: app_user_provider
 
+            form-login:
+                #app_login from LoginController
+                login-path: app_login
+                check-path: app_login
+
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
